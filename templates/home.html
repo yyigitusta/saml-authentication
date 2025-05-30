@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Giriş Başarılı</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>👋 Hoş Geldin!</h2>
+        <ul>
+            {% for key, values in attributes.items() %}
+                <li><strong>{{ key }}:</strong> {{ values[0] }}</li>
+            {% endfor %}
+        </ul>
+        <a href="/saml/logout">Çıkış Yap</a>
+    </div>
+</body>
+</html>

@@ -4,7 +4,10 @@ import os
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-
+"""
+BU FONKSİYONUN AMACI TAMAMEN FLASKTAN GELEN REQ(İSTEKLERİ) AUTH FONKSİYONUNUN YAPISINA UYGUN ŞEKİLDE ONA VERMEKTİR
+Çünkü OneLogin_Saml2_Auth sınıfı framework bağımsızdır ve bu bilgileri manuel ister.
+"""
 def prepare_flask_request():
     return {
         'https': 'on' if request.scheme == 'https' else 'off',
@@ -14,15 +17,20 @@ def prepare_flask_request():
         'get_data': request.args.copy(),
         'post_data': request.form.copy()
     }
-
+"""
+ASIL OLAY BURDADIR GELEN REQUESTLERİ İNCELER VE ONA GÖRE HAREKET EDER ,AYRICA SETTİNG JSON İÇİNDEKİ YAZILANLARI OKUR!!!
+"""
 def init_saml_auth(req):
     return OneLogin_Saml2_Auth(req, custom_base_path="saml")
-
+"""
+BURASININ YAPTIĞI İŞ EĞER SAML DA GİRİŞ ZATEN YAPILDIYSA BİZİ DİREKT HOME.HTML YE ATAR
+"""
 @app.route('/')
 def index():
     if 'samlUserdata' in session:
         return render_template('home.html', attributes=session['samlUserdata'])
-    return '<a href="/saml/login">SAML ile Giriş Yap</a>'
+    return render_template('login.html')
+
 
 @app.route('/saml/login')
 def saml_login():
@@ -37,10 +45,9 @@ def saml_acs():
     auth.process_response()
     errors = auth.get_errors()
 
-    print("🔴 SAML Errors:", errors)
-    print("📌 Last Error Reason:", auth.get_last_error_reason())
+    print("SAML Errors:", errors)
+    print("Last Error Reason:", auth.get_last_error_reason())
 
-    # AttributeStatement yoksa bile session aç (SSOCircle bazen boş döner)
     if 'There is no AttributeStatement on the Response' in auth.get_last_error_reason():
         session['samlUserdata'] = {'Kullanici': ['Anonim']}
         return redirect('/')
